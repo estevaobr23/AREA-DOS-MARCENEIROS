@@ -17,13 +17,15 @@ export default async function Projetos() {
   const cliente = await requireCustomer();
   const liberados = await idsProdutosLiberados(cliente.id);
 
+  // Toda oferta aparece aqui também, mesmo sem entitlement — mesma regra da
+  // Início (ver lib/config/catalogo.ts).
   const cards = CATALOGO.map((produto) => ({
     produto,
     temAcesso: produtoLiberado(produto, liberados),
     destino:
       produto.itens.find((i) => i.tipo === "principal")?.href ??
       `/produto/${produto.slug}`,
-  })).filter(({ produto, temAcesso }) => temAcesso || produto.aVenda);
+  }));
 
   return (
     <main className="envolucro">
@@ -63,7 +65,7 @@ export default async function Projetos() {
               <a
                 key={produto.slug}
                 className="vitCard vitCard--oferta"
-                href={produto.aVenda!.url}
+                href={produto.aVenda.url}
               >
                 <div className="vitCapa">
                   <Image
@@ -78,7 +80,7 @@ export default async function Projetos() {
                   <span className="vitTitulo">{produto.titulo}</span>
                   <p className="vitSub">{produto.subtitulo}</p>
                   <span className="vitAcao">
-                    {precoBRL(produto.aVenda!.precoBRL)}{" "}
+                    {precoBRL(produto.aVenda.precoBRL)}{" "}
                     <span aria-hidden>→</span>
                   </span>
                 </div>

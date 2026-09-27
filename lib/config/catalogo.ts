@@ -11,8 +11,11 @@
 //     ou como oferta. `null` = produto sem checkout ainda;
 //   - `itens` são os cards DENTRO da página do produto: exatamente 1 do tipo
 //     "principal" e quantos "bonus" existirem. Sem bônus? Deixe só o principal;
-//   - `aVenda` só quando o produto deve aparecer para quem NÃO tem acesso.
-//     Sem `aVenda` e sem acesso => o card nem aparece (nada de card fantasma).
+//   - `aVenda` é OBRIGATÓRIO em todo produto (regra do usuário, 27/09/2026):
+//     toda oferta do marceneiro tem que aparecer na Início pra todo mundo,
+//     mesmo quem não tem acesso — sem card fantasma escondido. Quem já tem
+//     entitlement abre o produto; quem não tem vê a oferta com preço e link
+//     de checkout.
 //
 // Ao adicionar um produto novo aqui, confirme que existe a linha correspondente
 // em `products` no banco (mesmo `cakto_product_id`) — senão ninguém terá acesso.
@@ -40,21 +43,21 @@ export type Produto = {
   capa: string;
   /** 1 item "principal" + N "bonus". */
   itens: ItemProduto[];
-  /** Presente só se o produto deve ser mostrado como oferta a quem não tem acesso. */
-  aVenda?: { precoBRL: number; url: string };
+  /** Obrigatório: preço/link exibido a quem ainda não tem acesso a este produto. */
+  aVenda: { precoBRL: number; url: string };
 };
 
 export const CATALOGO: Produto[] = [
   {
     slug: "acervo-3d-gatos",
-    // Tem que ser IDÊNTICO ao products.cakto_product_id no Supabase
-    // (projeto acervo-3d-membros) — é essa string que casa o entitlement do
-    // cliente com este produto em app/produto/[slug]/page.tsx. Atualizado em
-    // 17/09/2026 para o id real do produto ativo na Cakto ("100 Projetos de
-    // Móveis 3D para Gatos"); o webhook cakto-webhook grava esse mesmo id em
-    // products.cakto_product_id a cada compra aprovada — ver gpt.md, seção
-    // "Área de membros — fluxo de acesso", antes de trocar este valor de novo.
-    caktoProductId: "53893d88-1a58-4b12-b632-b17f07b28dcb",
+    // Tem que ser IDÊNTICO ao products.cakto_product_id no Supabase (projeto
+    // gatos-membros / xcopknglpddvkqalafml) — é o ID DA OFERTA na Cakto, não
+    // do produto raiz (o webhook cakto-webhook casa por offer.id primeiro).
+    // Corrigido em 27/09/2026: o valor antigo era um UUID de produto Cakto
+    // que nunca existiu na tabela products; o entitlement de teste real está
+    // gravado com "p5mahz4" (oferta "Plano Completo VIP" do produto
+    // a77ae4f9-..., "100 Móveis e Acessórios para Gatos").
+    caktoProductId: "p5mahz4",
     titulo: "Biblioteca de Fichas Visuais — Móveis para Gatos",
     subtitulo:
       "Fichas visuais A4 com medidas sugeridas, peças e montagem. Projetos selecionados também incluem visualização 3D interativa.",
@@ -78,18 +81,23 @@ export const CATALOGO: Produto[] = [
       // Sem bônus por enquanto. Para adicionar um, copie um item com
       // tipo: "bonus" e aponte o href para a rota do conteúdo dele.
     ],
-    // Sem `aVenda`: este é o produto que o cliente de teste já tem liberado;
-    // não há checkout público ainda.
+    // aVenda: mesmo o cliente de teste tendo acesso, todo produto precisa
+    // aparecer para quem NÃO comprou ainda — regra do usuário em 27/09/2026:
+    // toda oferta fica visível na Início, mesmo sem entitlement. Link é o
+    // checkout ativo da oferta "p5mahz4" na Cakto.
+    aVenda: { precoBRL: 29.9, url: "https://pay.cakto.com.br/p5mahz4" },
   },
   {
     slug: "50-projetos-moveis-caes",
-    // Tem que ser IDÊNTICO ao products.cakto_product_id no Supabase
-    // (mesmo projeto acervo-3d-membros, linha inserida em 18/09/2026 —
-    // ver CONTEXTO-INTEGRACAO-AREA-MEMBROS.md em "50 Projetos para pets").
-    caktoProductId: "8a2469fd-e827-4364-bffd-79e453db9109",
-    titulo: "50 Projetos de Móveis para Cães",
+    // Tem que ser IDÊNTICO ao products.cakto_product_id no Supabase (mesmo
+    // projeto gatos-membros). Corrigido em 27/09/2026: "8a2469fd-..." era um
+    // UUID de produto Cakto com status "deleted" e nunca existiu em
+    // products; o produto real e ativo é "40 Projetos de Casinhas e Móveis
+    // para Cães", já cadastrado no banco com a oferta "ptbzkoi".
+    caktoProductId: "ptbzkoi",
+    titulo: "40 Projetos de Casinhas e Móveis para Cães",
     subtitulo:
-      "Biblioteca visual com 50 projetos de casinhas, camas, comedouros e acessórios para planejar, adaptar e construir.",
+      "Biblioteca visual com projetos de casinhas, camas, comedouros e acessórios para planejar, adaptar e construir.",
     // Mesmo mockup usado no header e no "plano completo" do site de vendas
     // real (dist/index.html referencia hero-header-transparent-*.png) — não
     // o hero-header.png com fundo, que é uma variante não usada no site.
@@ -105,17 +113,18 @@ export const CATALOGO: Produto[] = [
         href: "/produto/50-projetos-moveis-caes",
       },
     ],
-    // aVenda: ainda não há entitlement de teste para este produto — o card
-    // aparece como oferta até a compra real liberar o acesso. Link é a
-    // oferta VIP (padrão) cadastrada na Cakto, id "zov8af3".
-    aVenda: { precoBRL: 29.9, url: "https://pay.cakto.com.br/zov8af3" },
+    // aVenda: sem entitlement de teste para este produto — o card aparece
+    // como oferta até a compra real liberar o acesso. Link é o checkout
+    // ativo da oferta "ptbzkoi" na Cakto.
+    aVenda: { precoBRL: 17.9, url: "https://pay.cakto.com.br/ptbzkoi" },
   },
   {
     slug: "sofas-varandas",
-    // Sem checkout Cakto ainda — produto em produção, só navegação local
-    // (ver DEV_BYPASS_AUTH em lib/auth/session.ts e app/page.tsx). Atualizar
-    // para o cakto_product_id real assim que o produto for criado na Cakto.
-    caktoProductId: null,
+    // Checkout criado na Cakto em 26/09/2026 ("Catálogo 40 Sofás", produto
+    // a6a41630-..., oferta padrão "peirk5a"). Linha correspondente inserida
+    // em products no Supabase (gatos-membros) no mesmo dia — sem essa linha
+    // o webhook cakto-webhook não teria como conceder o entitlement.
+    caktoProductId: "peirk5a",
     titulo: "40 Projetos de Sofás e Móveis para Varanda/Área Gourmet",
     subtitulo:
       "Biblioteca visual com 40 projetos de sofás, bancos e conjuntos para varanda e área gourmet: imagem de referência + ficha técnica com cotas.",
@@ -132,8 +141,7 @@ export const CATALOGO: Produto[] = [
         href: "/produto/sofas-varandas",
       },
     ],
-    // Sem aVenda: sem checkout ainda, este produto só aparece na Início sob
-    // DEV_BYPASS_AUTH=true (ver app/page.tsx).
+    aVenda: { precoBRL: 29.9, url: "https://pay.cakto.com.br/peirk5a" },
   },
 ];
 

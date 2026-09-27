@@ -15,12 +15,13 @@ export default async function Inicio() {
 
   const liberados = await idsProdutosLiberados(cliente.id);
 
-  // Um produto entra na vitrine se o cliente tem acesso OU se é uma oferta
-  // (`aVenda`). Sem acesso e sem oferta => não aparece.
+  // Toda oferta do marceneiro aparece na Início para todo mundo — quem tem
+  // acesso abre o produto, quem não tem vê a oferta (preço + checkout).
+  // Nenhum produto some da lista por falta de entitlement.
   const cards = CATALOGO.map((produto) => ({
     produto,
     temAcesso: produtoLiberado(produto, liberados),
-  })).filter(({ produto, temAcesso }) => temAcesso || produto.aVenda);
+  }));
 
   return (
     <main className="envolucro">
@@ -67,7 +68,7 @@ export default async function Inicio() {
               <a
                 key={produto.slug}
                 className="vitCard vitCard--oferta"
-                href={produto.aVenda!.url}
+                href={produto.aVenda.url}
               >
                 <div className="vitCapa">
                   <Image
@@ -82,7 +83,7 @@ export default async function Inicio() {
                   <span className="vitTitulo">{produto.titulo}</span>
                   <p className="vitSub">{produto.subtitulo}</p>
                   <span className="vitAcao">
-                    {precoBRL(produto.aVenda!.precoBRL)}{" "}
+                    {precoBRL(produto.aVenda.precoBRL)}{" "}
                     <span aria-hidden>→</span>
                   </span>
                 </div>
