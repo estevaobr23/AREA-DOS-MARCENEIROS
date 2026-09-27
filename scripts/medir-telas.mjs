@@ -35,7 +35,7 @@ const ESCONDER = [...fonte.matchAll(/necessidade: "esconder"/g)].length;
 
 const ROTAS = [
   { caminho: "/", nome: "inicio", espera: { ".catCard": CATEGORIAS }, capas: 0 },
-  { caminho: "/projetos", nome: "projetos", espera: { ".iniCard": TOTAL }, capas: TOTAL },
+  { caminho: "/projetos/gatos", nome: "projetos", espera: { ".iniCard": TOTAL }, capas: TOTAL },
   { caminho: "/categoria/esconder", nome: "categoria", espera: { ".iniCard": ESCONDER }, capas: ESCONDER },
   { caminho: "/perfil", nome: "perfil", espera: {}, capas: 0 },
 ];

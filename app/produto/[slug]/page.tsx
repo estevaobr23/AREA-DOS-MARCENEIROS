@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireCustomer } from "@/lib/auth/session";
-import { idsProdutosLiberados } from "@/lib/data/acesso";
+import { idsProdutosLiberados, produtoLiberado } from "@/lib/data/acesso";
 import { acharProduto, CATALOGO } from "@/lib/config/catalogo";
 import { listarFichas } from "@/lib/data/fichas";
 import { listarProjetos3D } from "@/lib/data/projetos3d";
@@ -46,9 +46,7 @@ export default async function PaginaProduto({
   // Acesso é entitlement. Sem entitlement ativo para este produto => 404
   // (mesma regra do resto da área: não revelar que o produto existe).
   const liberados = await idsProdutosLiberados(cliente.id);
-  const temAcesso =
-    produto.caktoProductId !== null && liberados.has(produto.caktoProductId);
-  if (!temAcesso) notFound();
+  if (!produtoLiberado(produto, liberados)) notFound();
 
   const principal = produto.itens.filter((i) => i.tipo === "principal");
   const bonus = produto.itens.filter((i) => i.tipo === "bonus");

@@ -13,6 +13,17 @@ const PUBLIC_ROUTES = ["/login"];
  * /login (nem estático) redireciona para /login.
  */
 export function proxy(request: NextRequest) {
+  // Bypass SÓ PARA DEV LOCAL: Supabase (acervo-3d-membros) pausado, sem banco
+  // para validar sessão real. Desliga o gate inteiro do proxy — qualquer rota
+  // abre direto, sem passar por /login. Nunca ativo em produção (checagem de
+  // NODE_ENV). Remover/desativar (DEV_BYPASS_AUTH=false) antes de deploy.
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.DEV_BYPASS_AUTH === "true"
+  ) {
+    return NextResponse.next();
+  }
+
   const { pathname } = request.nextUrl;
   const hasSessionCookie = Boolean(
     request.cookies.get(SESSION_COOKIE_NAME)?.value

@@ -1,5 +1,6 @@
 import { SUPORTE } from "@/lib/config/ofertas";
 import { getCurrentCustomer } from "@/lib/auth/session";
+import { AlternarTema } from "../alternar-tema";
 import { sair } from "./actions";
 
 export const metadata = { title: "Perfil · Móveis para Gatos" };
@@ -30,6 +31,14 @@ export default async function Perfil() {
             Sair da conta
           </button>
         </form>
+      </div>
+
+      <div className="perBloco">
+        <h2 className="perTitulo">Aparência</h2>
+        <div className="perAparencia">
+          <p className="perTexto">Modo claro ou escuro para toda a área.</p>
+          <AlternarTema />
+        </div>
       </div>
 
       <div className="perBloco">

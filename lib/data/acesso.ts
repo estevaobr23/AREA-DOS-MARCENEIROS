@@ -1,5 +1,23 @@
 import "server-only";
 import { getCustomerProducts } from "@/lib/data/products";
+import type { Produto } from "@/lib/config/catalogo";
+
+/**
+ * Regra única de "este produto é do cliente?". Sob DEV_BYPASS_AUTH (só fora de
+ * produção, Supabase pausado) todo produto sem oferta `aVenda` conta como
+ * liberado, para navegar o conteúdo local. Produto com `aVenda` continua
+ * aparecendo como oferta — o conteúdo dele depende do Storage do Supabase.
+ */
+export function produtoLiberado(produto: Produto, liberados: Set<string>): boolean {
+  if (produto.caktoProductId !== null && liberados.has(produto.caktoProductId)) {
+    return true;
+  }
+  return (
+    process.env.NODE_ENV !== "production" &&
+    process.env.DEV_BYPASS_AUTH === "true" &&
+    !produto.aVenda
+  );
+}
 
 /**
  * Conjunto de `cakto_product_id` a que o cliente tem acesso liberado

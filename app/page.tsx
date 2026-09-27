@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { requireCustomer } from "@/lib/auth/session";
-import { idsProdutosLiberados } from "@/lib/data/acesso";
+import { idsProdutosLiberados, produtoLiberado } from "@/lib/data/acesso";
 import { CATALOGO } from "@/lib/config/catalogo";
 import { precoBRL } from "@/lib/config/ofertas";
 import "./inicio.css";
@@ -17,11 +17,10 @@ export default async function Inicio() {
 
   // Um produto entra na vitrine se o cliente tem acesso OU se é uma oferta
   // (`aVenda`). Sem acesso e sem oferta => não aparece.
-  const cards = CATALOGO.map((produto) => {
-    const temAcesso =
-      produto.caktoProductId !== null && liberados.has(produto.caktoProductId);
-    return { produto, temAcesso };
-  }).filter(({ produto, temAcesso }) => temAcesso || produto.aVenda);
+  const cards = CATALOGO.map((produto) => ({
+    produto,
+    temAcesso: produtoLiberado(produto, liberados),
+  })).filter(({ produto, temAcesso }) => temAcesso || produto.aVenda);
 
   return (
     <main className="envolucro">

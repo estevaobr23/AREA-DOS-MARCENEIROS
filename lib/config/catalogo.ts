@@ -73,7 +73,7 @@ export const CATALOGO: Produto[] = [
         // não existe mais — os projetos foram renumerados e a torre alta
         // vertical real é "003-torre-alta-vertical" (imagem quebrada antes).
         capa: "/modelos/003-torre-alta-vertical/preview.png",
-        href: "/projetos",
+        href: "/projetos/gatos",
       },
       // Sem bônus por enquanto. Para adicionar um, copie um item com
       // tipo: "bonus" e aponte o href para a rota do conteúdo dele.
@@ -109,6 +109,31 @@ export const CATALOGO: Produto[] = [
     // aparece como oferta até a compra real liberar o acesso. Link é a
     // oferta VIP (padrão) cadastrada na Cakto, id "zov8af3".
     aVenda: { precoBRL: 29.9, url: "https://pay.cakto.com.br/zov8af3" },
+  },
+  {
+    slug: "sofas-varandas",
+    // Sem checkout Cakto ainda — produto em produção, só navegação local
+    // (ver DEV_BYPASS_AUTH em lib/auth/session.ts e app/page.tsx). Atualizar
+    // para o cakto_product_id real assim que o produto for criado na Cakto.
+    caktoProductId: null,
+    titulo: "40 Projetos de Sofás e Móveis para Varanda/Área Gourmet",
+    subtitulo:
+      "Biblioteca visual com 40 projetos de sofás, bancos e conjuntos para varanda e área gourmet: imagem de referência + ficha técnica com cotas.",
+    // Sem hero próprio ainda — capa provisória é a referência do projeto 01.
+    capa: "/fichas-sofas/referencia/01_sofa_reto_2_lugares_ripado.png",
+    itens: [
+      {
+        slug: "acervo",
+        tipo: "principal",
+        titulo: "Todos os projetos",
+        descricao:
+          "Imagem de referência e ficha técnica com cotas, materiais e construção para cada um dos 40 projetos.",
+        capa: "/fichas-sofas/referencia/01_sofa_reto_2_lugares_ripado.png",
+        href: "/produto/sofas-varandas",
+      },
+    ],
+    // Sem aVenda: sem checkout ainda, este produto só aparece na Início sob
+    // DEV_BYPASS_AUTH=true (ver app/page.tsx).
   },
 ];
 

@@ -25,7 +25,7 @@ export function PaginaProjeto({ slug }: { slug: string }) {
   return (
     <main className="envolucro tecPagina">
       <header className="pagTopo">
-        <Link className="pagVoltar" href="/projetos">
+        <Link className="pagVoltar" href="/projetos/gatos">
           <span aria-hidden>←</span> Voltar aos projetos
         </Link>
         <div className="projCabecalho">
@@ -68,7 +68,7 @@ export function PaginaProjeto({ slug }: { slug: string }) {
           <Image src={anterior.preview} alt="" width={96} height={72} />
           <span><small>PROJETO ANTERIOR · {anterior.codigo}</small><strong>{anterior.nome}</strong></span>
         </Link>
-        <Link className="tecTodosProjetos" href="/projetos"><span aria-hidden>⊞</span> Ver todos</Link>
+        <Link className="tecTodosProjetos" href="/projetos/gatos"><span aria-hidden>⊞</span> Ver todos</Link>
         <Link className="tecProjetoVizinho tecProjetoProximo" href={`/projetos/${proximo.slug}`}>
           <span><small>PRÓXIMO PROJETO · {proximo.codigo}</small><strong>{proximo.nome}</strong></span>
           <Image src={proximo.preview} alt="" width={96} height={72} />

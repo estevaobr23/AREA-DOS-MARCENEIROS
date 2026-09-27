@@ -16,6 +16,29 @@ export const SESSION_COOKIE_NAME = "session_token";
 const SESSION_DURATION_DAYS = 30;
 
 /**
+ * Bypass SOMENTE para navegar as telas com o Supabase (acervo-3d-membros)
+ * pausado/sem banco. Nunca real em produção: exige NODE_ENV !== "production"
+ * E a env var explícita. Não cria sessão nem customer de verdade — cookie
+ * marcador próprio, não passa pela tabela `sessions`.
+ */
+const DEV_BYPASS_EMAIL = "teste@dev.local";
+const DEV_BYPASS_COOKIE = "dev_bypass_session";
+
+function devBypassAtivo() {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    process.env.DEV_BYPASS_AUTH === "true"
+  );
+}
+
+const DEV_BYPASS_CUSTOMER: Customer = {
+  id: "00000000-0000-0000-0000-000000000000",
+  email: DEV_BYPASS_EMAIL,
+  name: "Cliente Teste (dev bypass)",
+  created_at: new Date(0).toISOString(),
+};
+
+/**
  * Atributos do cookie de sessão. Definidos UMA VEZ e usados tanto para gravar
  * quanto para apagar. NÃO duplique estes valores em outro arquivo.
  *
@@ -72,6 +95,15 @@ export async function createSession(
   customerId: string,
   meta: { userAgent?: string | null; ip?: string | null }
 ) {
+  if (devBypassAtivo() && customerId === DEV_BYPASS_CUSTOMER.id) {
+    const cookieStore = await cookies();
+    cookieStore.set(DEV_BYPASS_COOKIE, "1", {
+      ...sessionCookieOptions(),
+      expires: new Date(Date.now() + SESSION_DURATION_DAYS * 24 * 60 * 60 * 1000),
+    });
+    return;
+  }
+
   const token = randomBytes(32).toString("hex");
   const tokenHash = hashToken(token);
   const expiresAt = new Date(
@@ -103,6 +135,10 @@ export async function destroySession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
+  if (devBypassAtivo()) {
+    cookieStore.set(DEV_BYPASS_COOKIE, "", sessionCookieRemocao());
+  }
+
   if (token) {
     const supabase = createServiceClient();
     await supabase.from("sessions").delete().eq("token_hash", hashToken(token));
@@ -118,6 +154,13 @@ export async function destroySession() {
 
 /** Retorna o cliente autenticado da requisição atual, ou null. Deduplicado por requisição. */
 export const getCurrentCustomer = cache(async (): Promise<Customer | null> => {
+  // Bypass dev: com o proxy também liberado (ver proxy.ts), ninguém passa
+  // pela tela de login gerando o cookie normal — então aqui vale incondicional
+  // enquanto DEV_BYPASS_AUTH=true, sem depender de nenhum cookie.
+  if (devBypassAtivo()) {
+    return DEV_BYPASS_CUSTOMER;
+  }
+
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!token) return null;
@@ -176,6 +219,13 @@ export async function requireCustomer(): Promise<Customer> {
 export async function findLoginEligibleCustomer(
   email: string
 ): Promise<Customer | null> {
+  if (
+    devBypassAtivo() &&
+    email.trim().toLowerCase() === DEV_BYPASS_EMAIL
+  ) {
+    return DEV_BYPASS_CUSTOMER;
+  }
+
   const supabase = createServiceClient();
   const { data: customer } = await supabase
     .from("customers")
